@@ -6,7 +6,13 @@ const CampgroundSchema = new Schema({
     image: String,
     price: Number,
     description: String,
-    location: String
+    location: String,
+    reviews: [  // embed each review object for each campground in the campground schema -> one to many relationship
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Review"
+        }
+    ]
 })
 
 // compile a mongoose model based on a schema - provide (any) collection name, and the schema
