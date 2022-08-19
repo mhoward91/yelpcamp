@@ -2,15 +2,14 @@
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
-const Campground = require("./models/campground")  // require created model in mongoose
-const Review = require("./models/review")
 const methodOverride = require("method-override")
 const ejsMate = require("ejs-mate")  // helps with adding reusable html
-const catchAsync = require("./utils/catchAsync")
-const expressError = require("./utils/expressError")
+const flash = require("connect-flash")
 const ExpressError = require("./utils/expressError")
-const { campgroundSchema } = require("./schemas")
-const { reviewSchema } = require("./schemas")
+const session = require("express-session")
+
+const campgrounds = require("./routes/campgrounds")  // require campgrounds routes 
+const reviews = require("./routes/reviews")  // require reviews routes
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp")
     .then(() => {
@@ -33,96 +32,44 @@ app.set("views", path.join(__dirname, "views"))
 // once res.send or res.render is called, the chain of middleware calls ceases
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride("_method"))
+app.use(express.static(path.join(__dirname, "public")))
 
-const validateCampground = (req, res, next) => {
-    const { error } = campgroundSchema.validate(req.body)
-    if (error) {
-        const msg = error.details.map(el => el.message).join(",")
-        throw new ExpressError(msg, 400)
-    } else {
-        next()
+// object to configure the session
+const sessionConfig = {
+    secret: "thishouldbeabettersecret!",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
 
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body)
-    if (error) {
-        const msg = error.details.map(el => el.message).join(",")
-        throw new ExpressError(msg, 400)
-    } else {
-        next()
-    }
-}
+// create a session with express-session package -> flash relies on this
+app.use(session(sessionConfig))
+// enable flash with connect-flash package
+app.use(flash())
+
+// flash middleware -> anything flashed under key success is available under res.locals.success for each request - can render as ejs
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success")
+    res.locals.error = req.flash("error")
+    next()
+})
+
+// routing -> all routes in campgrounds router (defined in separate file campgrounds.js, should be prefixed with "/campgrounds" 
+app.use("/campgrounds", campgrounds)
+app.use("/campgrounds/:id/reviews", reviews)
 
 app.get("/", (req, res) => {
     res.render("home")
 })
 
-app.get("/campgrounds", catchAsync(async (req, res) => {
-    const campgrounds = await Campground.find({})
-    res.render("campgrounds/index", { campgrounds })
-}))
-
-app.get("/campgrounds/new", (req, res) => {
-    res.render("campgrounds/new")
-})
-
-app.get("/campgrounds/:id", async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate("reviews")
-    res.render("campgrounds/show", { campground })
-})
-
-// // next param is required to call the next middleware function (in this case an error handling middleware function)
-// // alternative version below shows use of a wrapper function, avoiding using try & catch each time
-// app.post("/campgrounds", async (req, res, next) => {
-//     try {
-//         const campground = new Campground(req.body.campground)
-//         await campground.save()
-//         res.redirect(`/campgrounds/${campground._id}`)
-//     } catch (e) {
-//         next(e)
-//     }
-// })
-
-// the catchAsync utility fn will pass any errors to the error handling middleware 
-// use of third party library joi to do json payload validation on the server side
-// invoked through validateCamground middleware function
-app.post("/campgrounds", validateCampground, catchAsync(async (req, res, next) => {
-    const campground = new Campground(req.body.campground)
-    await campground.save()
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
-app.get("/campgrounds/:id/edit", catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id)
-    res.render("campgrounds/edit", { campground })
-}))
-
-app.put("/campgrounds/:id", validateCampground, catchAsync(async (req, res) => {
-    const { id } = req.params
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground })
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
-app.delete("/campgrounds/:id", catchAsync(async (req, res) => {
-    const { id } = req.params
-    await Campground.findByIdAndDelete(id)
-    res.redirect("/campgrounds")
-}))
-
-app.post("/campgrounds/:id/reviews", validateReview, catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id)
-    const review = new Review(req.body.review)
-    campground.reviews.push(review)
-    await review.save()
-    await campground.save()
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-
 // will run for any request not previously matched
 // will pass any error to the error handling middleware with error as the err paraam
 app.all("*", (req, res, next) => {
-    next(new expressError("Page not found", 404))
+    next(new ExpressError("Page not found", 404))
 })
 
 // error handling -> requires err, req, res, next params for express to identify it as an error handler
