@@ -7,9 +7,13 @@ const ejsMate = require("ejs-mate")  // helps with adding reusable html
 const flash = require("connect-flash")
 const ExpressError = require("./utils/expressError")
 const session = require("express-session")
+const passport = require("passport")
+const LocalStrategy = require("passport-local")
+const User = require("./models/user")
 
-const campgrounds = require("./routes/campgrounds")  // require campgrounds routes 
-const reviews = require("./routes/reviews")  // require reviews routes
+const userRoutes = require("./routes/users")
+const campgroundRoutes = require("./routes/campgrounds")  // require campgrounds routes 
+const reviewRoutes = require("./routes/reviews")  // require reviews routes
 
 mongoose.connect("mongodb://localhost:27017/yelp-camp")
     .then(() => {
@@ -51,16 +55,26 @@ app.use(session(sessionConfig))
 // enable flash with connect-flash package
 app.use(flash())
 
+// config code for passport (authentication)
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new LocalStrategy(User.authenticate()))
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
+
 // flash middleware -> anything flashed under key success is available under res.locals.success for each request - can render as ejs
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user
     res.locals.success = req.flash("success")
     res.locals.error = req.flash("error")
     next()
 })
 
 // routing -> all routes in campgrounds router (defined in separate file campgrounds.js, should be prefixed with "/campgrounds" 
-app.use("/campgrounds", campgrounds)
-app.use("/campgrounds/:id/reviews", reviews)
+app.use("/", userRoutes)
+app.use("/campgrounds", campgroundRoutes)
+app.use("/campgrounds/:id/reviews", reviewRoutes)
 
 app.get("/", (req, res) => {
     res.render("home")
