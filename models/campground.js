@@ -8,6 +8,10 @@ const CampgroundSchema = new Schema({
     price: Number,
     description: String,
     location: String,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
     reviews: [  // embed each review object for each campground in the campground schema -> one to many relationship
         {
             type: Schema.Types.ObjectId,
