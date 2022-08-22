@@ -6,6 +6,9 @@ const campgrounds = require("../controllers/campgrounds")
 const ExpressError = require("../utils/expressError")
 const { campgroundSchema } = require("../schemas")
 const { isLoggedIn, validateCampground, isAuthor } = require("../middleware")
+const multer = require("multer")
+const { storage } =  require("../cloudinary")  // node automatically returns the index.js file in a specified folder
+const upload = multer({ storage })
 
 // note callback functions are named in below routes only and defined within the `controllers` dir
 // router.route from express used to chain different request types to the same route (e.g. a GET and POST to "/")
@@ -16,13 +19,13 @@ const { isLoggedIn, validateCampground, isAuthor } = require("../middleware")
 
 router.route("/")
     .get(catchAsync(campgrounds.index))
-    .post(isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground))
+    .post(isLoggedIn, upload.array("image"), validateCampground, catchAsync(campgrounds.createCampground))
 
 router.get("/new", isLoggedIn, campgrounds.renderNewForm)
 
 router.route("/:id")
     .get(catchAsync(campgrounds.showCampground))
-    .put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground))
+    .put(isLoggedIn, isAuthor, upload.array("image"), validateCampground, catchAsync(campgrounds.updateCampground))
     .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground))
 
 

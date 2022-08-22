@@ -1,4 +1,10 @@
 // run mongo on local machine 
+
+// access locally stored environment variables from .env file if app not in production
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config()
+}
+
 const express = require("express")
 const path = require("path")
 const mongoose = require("mongoose")
