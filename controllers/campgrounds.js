@@ -8,7 +8,11 @@ const geocoder = mbxGeocoding({ accessToken: mapBoxToken })
 const { cloudinary } = require("../cloudinary")
 
 module.exports.index = async (req, res) => {
-    const campgrounds = await Campground.find({})
+    const campgrounds = await
+    Campground.find({}).populate({
+        path: "popupText",
+        strictPopulate: false
+    })
     res.render("campgrounds/index", { campgrounds })
 }
 
@@ -34,11 +38,17 @@ module.exports.createCampground = async (req, res, next) => {
 
 module.exports.showCampground = async (req, res) => {
     const campground = await Campground.findById(req.params.id).populate({
-        path: "reviews",
-        populate: {
-            path: "author"
-        }
-    }).populate("author")
+        path: "author",
+        strictPopulate: false
+    })
+    await campground.populate({path: "reviews", populate: "author"})
+    
+    //     path: "reviews",
+    //     populate: {
+    //         path: "author"
+    //     }
+
+    // }).populate("author")
     if (!campground) {
         req.flash("error", "That campground doesn't exist!")
         res.redirect("/campgrounds")
