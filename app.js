@@ -20,7 +20,7 @@ const User = require("./models/user")
 const mongoSanitize = require("express-mongo-sanitize")
 
 const userRoutes = require("./routes/users")
-const campgroundRoutes = require("./routes/campgrounds")  // require campgrounds routes 
+const courseRoutes = require("./routes/courses")  // require courses routes 
 const reviewRoutes = require("./routes/reviews")  // require reviews routes
 
 const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp"
@@ -98,10 +98,10 @@ app.use((req, res, next) => {
     next()
 })
 
-// routing -> all routes in campgrounds router (defined in separate file campgrounds.js, should be prefixed with "/campgrounds" 
+// routing -> all routes in courses router (defined in separate file courses.js, should be prefixed with "/courses" 
 app.use("/", userRoutes)
-app.use("/campgrounds", campgroundRoutes)
-app.use("/campgrounds/:id/reviews", reviewRoutes)
+app.use("/courses", courseRoutes)
+app.use("/courses/:id/reviews", reviewRoutes)
 
 app.get("/", (req, res) => {
     res.render("home")

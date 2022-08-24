@@ -3,16 +3,17 @@
     <div id="cluster-map" style="width: 100%; height: 500px"></div>
     <div class="container">
         <br>
-        <h1>All Golf Courses</h1>
+        <h1>All Golf courses</h1>
         <div>
-            <a href="/campgrounds/new">Add Golf Course</a>
+            <a href="/courses/new">Add Golf Course</a>
         </div>
-        <% for (let campground of campgrounds) { %>
+        <br>
+        <% for (let course of courses) { %>
             <div class="card mb-3">
                 <div class="row">
                     <div class="col-md-4">
-                        <% if (campground.images.length) { %>
-                            <img class="img-fluid" alt="" src="<%=campground.images[0].url%>">
+                        <% if (course.images.length) { %>
+                            <img class="img-fluid" alt="" src="<%=course.images[0].url%>">
                             <% } else { %>
                                 <img class="img-fluid"
                                     src="https://res.cloudinary.com/dudxgdkl3/image/upload/v1661177824/YelpCamp/lcarwv79yhl89ayxo2qk.jpg"
@@ -22,19 +23,19 @@
                     <div class="col-md-8">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <%=campground.title%>
+                                <%=course.title%>
                             </h5>
 
                             <p class="card-text">
-                                <%=campground.description%>
+                                <%=course.description%>
                             </p>
                             <p class="card-text">
                                 <small class="text-muted">
-                                    <%=campground.location%>
+                                    <%=course.location%>
                                 </small>
                             </p>
-                            <a class="btn btn-primary" href="/campgrounds/<%=campground._id%>">View
-                                <%=campground.title%>
+                            <a class="btn btn-primary" href="/courses/<%=course._id%>">View
+                                <%=course.title%>
                             </a>
                         </div>
                     </div>
@@ -45,7 +46,7 @@
 
     <script>
         const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
-        const campgrounds = { features: <%-JSON.stringify(campgrounds)%>}
+        const courses = { features: <%-JSON.stringify(courses)%>}
     </script>
     
     <script src="/javascripts/clusterMap.js"></script>

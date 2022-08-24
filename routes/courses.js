@@ -1,11 +1,11 @@
 const express = require("express")
 const router = express.Router()
 const catchAsync = require("../utils/catchAsync")
-const Campground = require("../models/campground")
-const campgrounds = require("../controllers/campgrounds")
+const Course = require("../models/course")
+const courses = require("../controllers/courses")
 const ExpressError = require("../utils/expressError")
-const { campgroundSchema } = require("../schemas")
-const { isLoggedIn, validateCampground, isAuthor } = require("../middleware")
+const { courseSchema } = require("../schemas")
+const { isLoggedIn, validateCourse, isAuthor } = require("../middleware")
 const multer = require("multer")
 const { storage } =  require("../cloudinary")  // node automatically returns the index.js file in a specified folder
 const upload = multer({ storage })
@@ -18,28 +18,28 @@ const upload = multer({ storage })
 // invoked through validateCamground middleware function
 
 router.route("/")
-    .get(catchAsync(campgrounds.index))
-    .post(isLoggedIn, upload.array("image"), validateCampground, catchAsync(campgrounds.createCampground))
+    .get(catchAsync(courses.index))
+    .post(isLoggedIn, upload.array("image"), validateCourse, catchAsync(courses.createCourse))
 
-router.get("/new", isLoggedIn, campgrounds.renderNewForm)
+router.get("/new", isLoggedIn, courses.renderNewForm)
 
 router.route("/:id")
-    .get(catchAsync(campgrounds.showCampground))
-    .put(isLoggedIn, isAuthor, upload.array("image"), validateCampground, catchAsync(campgrounds.updateCampground))
-    .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground))
+    .get(catchAsync(courses.showCourse))
+    .put(isLoggedIn, isAuthor, upload.array("image"), validateCourse, catchAsync(courses.updateCourse))
+    .delete(isLoggedIn, isAuthor, catchAsync(courses.deleteCourse))
 
 
-router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditForm))
+router.get("/:id/edit", isLoggedIn, isAuthor, catchAsync(courses.renderEditForm))
 
 module.exports = router
 
 // // the next param is required to call the next middleware function (in this case an error handling middleware function)
 // // alternative version below shows use of a wrapper function, avoiding using try & catch each time
-// app.post("/campgrounds", async (req, res, next) => {
+// app.post("/courses", async (req, res, next) => {
 //     try {
-//         const campground = new Campground(req.body.campground)
-//         await campground.save()
-//         res.redirect(`/campgrounds/${campground._id}`)
+//         const course = new Course(req.body.course)
+//         await course.save()
+//         res.redirect(`/courses/${course._id}`)
 //     } catch (e) {
 //         next(e)
 //     }

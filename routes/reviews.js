@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router({ mergeParams: true })
 
 const Review = require("../models/review")
-const Campground = require("../models/campground")  
+const Course = require("../models/course")  
 
 const { reviewSchema } = require("../schemas")
 

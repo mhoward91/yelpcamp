@@ -2,21 +2,21 @@
     <div class="row">
         <h1 class="text-center">New Golf Course</h1>
         <div class="col-6 offset-3">
-            <form action="/campgrounds" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
+            <form action="/courses" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label" for="title">Name</label>
-                    <input class="form-control" type="text" id="title" name="campground[title]" required>
+                    <input class="form-control" type="text" id="title" name="course[title]" required>
                     <div class="valid-feedback">Good!</div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="location">Location</label>
-                    <input class="form-control" type="text" id="location" name="campground[location]" required>
+                    <input class="form-control" type="text" id="location" name="course[location]" required>
                     <div class="valid-feedback">Good!</div>
                 </div>
                 <!-- <input type="file" name="image" id="" multiple> -->
                 <!-- <div class="mb-3">
                     <label class="form-label" for="image">Image Url</label>
-                    <input class="form-control" type="text" id="image" name="campground[image]" required>
+                    <input class="form-control" type="text" id="image" name="course[image]" required>
                     <div class="valid-feedback">Good!</div>
                 </div> -->
                 <div class="mb-3">
@@ -24,14 +24,14 @@
                     <div class="input-group">
                         <span class="input-group-text" id="price-label">$</span>
                         <input type="text" class="form-control" id="price" placeholder="0.00" aria-label="price"
-                            aria-describedby="price-label" name="campground[price]" required>
+                            aria-describedby="price-label" name="course[price]" required>
                         <div class="valid-feedback">Good!</div>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
-                    <textarea class="form-control" type="text" id="description" name="campground[description]"
+                    <textarea class="form-control" type="text" id="description" name="course[description]"
                         required></textarea>
                     <div class="valid-feedback">Good!</div>
                 </div>
@@ -43,6 +43,6 @@
                     <button class="btn btn-success">Add Golf Course</button>
                 </div>
             </form>
-            <a href="/campgrounds">All Golf Courses</a>
+            <a href="/courses">All Golf courses</a>
         </div>
     </div>
