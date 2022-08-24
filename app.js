@@ -17,11 +17,18 @@ const passport = require("passport")
 const LocalStrategy = require("passport-local")
 const User = require("./models/user")
 
+const mongoSanitize = require("express-mongo-sanitize")
+
 const userRoutes = require("./routes/users")
 const campgroundRoutes = require("./routes/campgrounds")  // require campgrounds routes 
 const reviewRoutes = require("./routes/reviews")  // require reviews routes
 
-mongoose.connect("mongodb://localhost:27017/yelp-camp")
+const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp"
+
+const MongoDBStore = require("connect-mongo")(session)
+
+mongoose.connect(dbUrl) // local mongo connection
+// mongoose.connect(dbUrl) // atlas (cloud) mongo connection
     .then(() => {
         console.log("CONNECTION OPEN")
     })
@@ -43,20 +50,34 @@ app.set("views", path.join(__dirname, "views"))
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride("_method"))
 app.use(express.static(path.join(__dirname, "public")))
+app.use(mongoSanitize())
+
+const secret = process.env.SECRET || "thisshouldbeabettersecret!"
+
+// config to setup session store in mongo atlas
+const store = new MongoDBStore({
+    url: dbUrl,
+    secret,
+    touchAfter: 24 * 60 * 60
+})
+
 
 // object to configure the session
 const sessionConfig = {
-    secret: "thishouldbeabettersecret!",
+    store,
+    name: "session",
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
 
-// create a session with express-session package -> flash relies on this
+// create a session with express-session package -> flash relies on this.
 app.use(session(sessionConfig))
 // enable flash with connect-flash package
 app.use(flash())
